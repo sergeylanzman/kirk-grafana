@@ -6,6 +6,6 @@ export GOPATH="$PWD"
 echo $PWD
 
 cd src/github.com/grafana/grafana
-go run build.go setup
+go run build.go setup || exit 1
 
-yarn install
+yarn install && exit 1

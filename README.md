@@ -1,5 +1,9 @@
 # Pili 定制 Grafana
 
+## Clone 这个 Repo
+
+- 必须放在 ``src/github.com/grafana/grafana`` 这个路径中. 
+
 ## 准备
 
 > 请确认安装了正确的版本

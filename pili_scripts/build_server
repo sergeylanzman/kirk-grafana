@@ -6,4 +6,4 @@ export GOPATH="$PWD"
 echo $PWD
 
 cd src/github.com/grafana/grafana
-go run build.go build
+go run build.go build || exit 1
