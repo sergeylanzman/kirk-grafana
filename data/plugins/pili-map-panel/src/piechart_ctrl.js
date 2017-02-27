@@ -1,5 +1,5 @@
 import {MetricsPanelCtrl} from 'app/plugins/sdk';
-import echarts from 'app/plugins/echarts';
+import echarts from 'app/plugins/pili/echarts';
 import _ from 'lodash';
 
 export class PieChartCtrl extends MetricsPanelCtrl {
