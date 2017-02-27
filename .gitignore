@@ -27,8 +27,12 @@ public/css/*.min.css
 *.iml
 .vscode/
 
-/data/*
 /bin/*
+/data/log/*
+/data/sessions/*
+/data/grafana.db
+/data/plugins/*/node_modules
+/data/plugins/*/dist
 
 conf/custom.ini
 fig.yml
