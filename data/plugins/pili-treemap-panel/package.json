@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "lodash": "~4.16.2",
-    "requirejs": "~2.2.0",
-    "echarts": "~2.2.7"
+    "requirejs": "~2.2.0"
   }
 }
