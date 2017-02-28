@@ -70,7 +70,7 @@ export class MapCtrl extends MetricsPanelCtrl {
         this._legendData = [];
     }
 
-    _parseData(dataList) {
+    _parseData(dataList, option) {
         this._series.forEach(serie => this._clearSerieData(serie.data));
         dataList.forEach(({target, datapoints}) => {
             const targetMatcher = target.match(/\{.+}/);
@@ -95,11 +95,9 @@ export class MapCtrl extends MetricsPanelCtrl {
                                                      : 'main';
             this._updateSerieData(targetObj.province, serieName, datapoints);
         });
-        console.log(this._series);
-        this._myChart.setOption({
-            series: this._series,
-            legend: {data: this._legendData},
-        });
+        option.series = this._series;
+        option.legend = option.legend || {data: this._legendData};
+        return option;
     }
 
     _parseTargetObjString(strObj) {
@@ -113,12 +111,17 @@ export class MapCtrl extends MetricsPanelCtrl {
     }
 
     _clearSerieData(data) {
-        while(data.length > 0) {
-            data.pop();
-        }
-        provinces.forEach(province => data.push({
-            name: province, value: NaN,
-        }));
+        provinces.forEach(province => {
+            const cell = data.find(cell => cell.name === province);
+            if (cell) {
+                cell.value = NaN;
+            } else {
+                data.push({
+                    name: province,
+                    value: NaN,
+                });
+            }
+        });
     }
 
     _updateSerieData(province, serieName, datapoints) {
@@ -129,14 +132,18 @@ export class MapCtrl extends MetricsPanelCtrl {
                 type: 'map',
                 mapType: 'china',
                 roam: false,
+                showLegendSymbol: true,
                 data: [],
-                label: {
+                itemStyle: {
                     normal: {
-                        show: true
+                        label: {show: false},
+                        color: "#32cd32",
                     },
                     emphasis: {
-                        show: true
-                    }
+                        borderWidth: 1,
+                        borderColor: "#fff",
+                        color: "#32cd32",
+                    },
                 },
             };
             this._seriesMap[serieName] = serie;
@@ -151,43 +158,49 @@ export class MapCtrl extends MetricsPanelCtrl {
     }
 
     onDataReceived(dataList) {
+        let option = {};
         if (!this.didRenderThisComponent) {
             this._myChart = echarts.init(document.getElementById('echart-dom'));
             // 指定图表的配置项和数据
-            var option = {
+            option = {
                 tooltip: {
-                    trigger: 'item'
+                    trigger: 'item',
+                    formatter: '{b}<br/>{c}',
                 },
                 legend: {
-                    orient: 'vertical',
-                    left: 'left',
-                    data: []
+                    show: true,
+                    orient: "vertical",
+                    left: "left",
+                    data: this.legendData,
                 },
                 visualMap: {
-                    min: 0,
-                    max: 2500,
-                    left: 'left',
-                    top: 'bottom',
-                    text: ['高', '低'],           // 文本，默认为数值文本
-                    calculable: true
+                    left: "left",
+                    top: "bottom",
+                    text: ["高", "低"],
+                    calculable: true,
+                    max: 20,
+                    min: 10,
+                    inRange: {
+                        color: [
+                            "#0C8918",
+                            "#9ED900",
+                            "#F05654",
+                            "#C91F37",
+                        ],
+                    },
                 },
                 toolbox: {
                     show: true,
-                    orient: 'vertical',
-                    left: 'right',
-                    top: 'center',
-                    feature: {
-                        dataView: {readOnly: false},
-                        restore: {},
-                        saveAsImage: {}
-                    }
+                    orient: "vertical",
+                    left: "right",
+                    top: "center",
                 },
                 series: [],
             };
-            this._myChart.setOption(option);
             this.didRenderThisComponent = true;
         }
-        this._parseData(dataList);
+        option = this._parseData(dataList, option);
+        this._myChart.setOption(option);
     }
 
     onDataError() {
