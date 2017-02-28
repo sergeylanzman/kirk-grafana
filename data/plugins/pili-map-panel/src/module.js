@@ -1,6 +1,6 @@
-import {PieChartCtrl} from './piechart_ctrl';
+import {MapCtrl} from './map_ctrl';
 
 export {
-  PieChartCtrl as PanelCtrl
+  MapCtrl as PanelCtrl
 };
 
