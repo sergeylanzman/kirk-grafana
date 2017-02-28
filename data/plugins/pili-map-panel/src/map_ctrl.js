@@ -137,12 +137,10 @@ export class MapCtrl extends MetricsPanelCtrl {
                 itemStyle: {
                     normal: {
                         label: {show: false},
-                        color: "#32cd32",
                     },
                     emphasis: {
                         borderWidth: 1,
                         borderColor: "#fff",
-                        color: "#32cd32",
                     },
                 },
             };
@@ -171,15 +169,15 @@ export class MapCtrl extends MetricsPanelCtrl {
                     show: true,
                     orient: "vertical",
                     left: "left",
-                    data: this.legendData,
+                    data: this._legendData,
                 },
                 visualMap: {
                     left: "left",
                     top: "bottom",
                     text: ["高", "低"],
                     calculable: true,
-                    max: 20,
-                    min: 10,
+                    max: 1100,
+                    min: 300,
                     inRange: {
                         color: [
                             "#0C8918",
