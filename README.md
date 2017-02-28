@@ -2,7 +2,9 @@
 
 ## Clone 这个 Repo
 
-- 必须放在 ``src/github.com/grafana/grafana`` 这个路径中. 
+- 如果你想把 repo 放在本地的 ``/home/pili-apm-grafana``。
+- 则 repo 必须放在 ``/home/pili-apm-grafana/src/github.com/grafana/grafana`` 这个路径中。
+- 并且把 GOPATH 设置成 ``/home/pili-apm-grafana``。
 
 ## 准备
 
@@ -35,5 +37,5 @@
 
 ## 注意事项
 
-- 任何针对 Grafana 的修改都用重新构造，并重启服务器。
+- 任何针对 Grafana 的修改都必须重新构造，并重启服务器。
 - 仅修改 Grafana Plugin，仅需要重新构造 Plugin，并刷新浏览器即可。
