@@ -1,7 +1,7 @@
 {
   "type": "panel",
   "name": "TreeMap Panel",
-  "id": "pili-tree-panel",
+  "id": "pili-treemap-panel",
 
   "info": {
     "description": "TreeMap panel for grafana",
