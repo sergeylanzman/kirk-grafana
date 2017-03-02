@@ -1,0 +1,32 @@
+<div class="editor-row">
+    <div class="section gf-from-group">
+        <h5 class="section-heading">border</h5>
+        <div class="gf-form">
+            <label class="gf-form-label width-9">Border Width</label>
+            <input type="text" placeholder="1" class="input-small gf-form-input width-9"
+               ng-model="ctrl.panel.borderSetting.borderWidth"
+               ng-change="ctrl.render()" ng-model-onblur />
+        </div>
+        <div class="gf-form">
+            <label class="gf-form-label width-9">Border Color</label>
+            <spectrum-picker class="gf-form-input" ng-model="ctrl.panel.borderSetting.borderColor"
+                         ng-change="ctrl.render()" >
+
+            </spectrum-picker>
+        </div>
+    </div>
+    <div class="section gf-from-group">
+        <h5 class="section-heading">font</h5>
+        <div class="gf-form">
+            <label class="gf-form-label width-9">Font Size</label>
+            <input type="text" class="input-small gf-form-input width-9"
+                   ng-model="ctrl.panel.textFontSetting.fontSize"
+                   ng-change="ctrl.render()" ng-model-onblur />
+        </div>
+        <div class="gf-form">
+            <label class="gf-form-label width-9">Font Color</label>
+            <spectrum-picker class="gf-form-input" ng-model="ctrl.panel.textFontSetting.color"
+                             ng-change="ctrl.render()" >
+            </spectrum-picker>
+        </div>
+</div>

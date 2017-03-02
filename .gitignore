@@ -1,45 +1,45 @@
-node_modules
-npm-debug.log
-coverage/
-.aws-config.json
-awsconfig
-/dist
-/emails/dist
-/public_gen
-/public/vendor/npm
-/tmp
-vendor/phantomjs/phantomjs
+/src/github.com/grafana/grafana/node_modules
+/src/github.com/grafana/grafana/npm-debug.log
+/src/github.com/grafana/grafana/coverage/
+/src/github.com/grafana/grafana/.aws-config.json
+/src/github.com/grafana/grafana/awsconfig
+/src/github.com/grafana/grafana/dist
+/src/github.com/grafana/grafana/emails/dist
+/src/github.com/grafana/grafana/public_gen
+/src/github.com/grafana/grafana/public/vendor/npm
+/src/github.com/grafana/grafana/tmp
+/src/github.com/grafana/grafana/vendor/phantomjs/phantomjs
 
-docs/AWS_S3_BUCKET
-docs/GIT_BRANCH
-docs/VERSION
-docs/GITCOMMIT
-docs/changed-files
-docs/changed-files
+/src/github.com/grafana/grafana/docs/AWS_S3_BUCKET
+/src/github.com/grafana/grafana/docs/GIT_BRANCH
+/src/github.com/grafana/grafana/docs/VERSION
+/src/github.com/grafana/grafana/docs/GITCOMMIT
+/src/github.com/grafana/grafana/docs/changed-files
+/src/github.com/grafana/grafana/docs/changed-files
 
 # locally required config files
-public/css/*.min.css
+/src/github.com/grafana/grafana/public/css/*.min.css
 
 # Editor junk
 *.sublime-workspace
 *.swp
-.idea/
+/src/github.com/grafana/grafana/.idea/
 *.iml
 .vscode/
 
-/bin/*
-/data/log/*
-/data/sessions/*
-/data/grafana.db
-/data/plugins/*/node_modules
-/data/plugins/*/dist
+/src/github.com/grafana/grafana/bin/*
+/src/github.com/grafana/grafana/data/log/*
+/src/github.com/grafana/grafana/data/sessions/*
+/src/github.com/grafana/grafana/data/grafana.db
+/src/github.com/grafana/grafana/data/plugins/*/node_modules
+/src/github.com/grafana/grafana/data/plugins/*/dist
 
-conf/custom.ini
-fig.yml
-docker-compose.yml
-profile.cov
-/grafana
-.notouch
-/pkg/cmd/grafana-cli/grafana-cli
-/pkg/cmd/grafana-server/grafana-server
-/examples/*/dist
+/src/github.com/grafana/grafana/conf/custom.ini
+/src/github.com/grafana/grafana/fig.yml
+/src/github.com/grafana/grafana/docker-compose.yml
+/src/github.com/grafana/grafana/profile.cov
+/src/github.com/grafana/grafana/grafana
+/src/github.com/grafana/grafana/.notouch
+/src/github.com/grafana/grafana/pkg/cmd/grafana-cli/grafana-cli
+/src/github.com/grafana/grafana/pkg/cmd/grafana-server/grafana-server
+/src/github.com/grafana/grafana/examples/*/dist

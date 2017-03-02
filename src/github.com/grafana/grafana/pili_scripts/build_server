@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+BASEDIR=$(dirname "$0")
+cd $BASEDIR/../../../../../
+export GOPATH="$PWD"
+echo $PWD
+
+cd src/github.com/grafana/grafana
+go run build.go build || exit 1

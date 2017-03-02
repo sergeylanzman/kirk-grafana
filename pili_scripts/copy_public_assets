@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-cp -R public_assets/ public_gen/ || exit 1

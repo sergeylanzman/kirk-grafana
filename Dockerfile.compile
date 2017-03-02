@@ -1,0 +1,35 @@
+FROM node:6.9
+MAINTAINER moskize "taozeyu@qiniu.com"
+
+RUN mkdir /root/donwloads
+WORKDIR /root/donwloads
+RUN wget https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz
+RUN tar -xvf go1.8.linux-amd64.tar.gz
+RUN mv go /usr/local
+ENV GOROOT /usr/local/go
+ENV GOPATH /root/pili/portal-server
+ENV PATH /root/pili/:$GOPATH/bin:$GOROOT/bin:$PATH
+
+RUN npm install yarn -g
+RUN npm install grunt -g
+
+COPY . /root/pili/
+WORKDIR /root/pili/src/github.com/grafana/grafana
+
+RUN pili_scripts/build_server || exit 1
+
+RUN npm install || exit 1
+RUN npm run build || exit 1
+
+RUN pili_scripts/build_plugins || exit 1
+
+RUN git clone https://github.com/kirk-enterprise/library-images.git
+WORKDIR /root/pili/src/github.com/grafana/grafana/library-images/grafana
+
+RUN mkdir /root/pili/src/github.com/grafana/grafana/data/plugins/datasource
+RUN mkdir /root/pili/src/github.com/grafana/grafana/data/plugins/datasource/kirkmonitor
+RUN cp -a datasource/kirkmonitor/. /root/pili/src/github.com/grafana/grafana/data/plugins/datasource/kirkmonitor/
+
+WORKDIR /root/pili/src/github.com/grafana/grafana
+
+CMD bin/grafana-server
