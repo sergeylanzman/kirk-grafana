@@ -30,6 +30,9 @@ RUN mkdir /root/pili/src/github.com/grafana/grafana/data/plugins/datasource
 RUN mkdir /root/pili/src/github.com/grafana/grafana/data/plugins/datasource/kirkmonitor
 RUN cp -a datasource/kirkmonitor/. /root/pili/src/github.com/grafana/grafana/data/plugins/datasource/kirkmonitor/
 
-WORKDIR /root/pili/src/github.com/grafana/grafana
+ENV GOPATH /root/pili/pandora-sniplet
+WORKDIR /root/pili/pandora-sniplet
+RUN go build app
 
-CMD bin/grafana-server
+WORKDIR /root/pili/src/github.com/grafana/grafana/
+CMD bin/grafana-server & /root/pili/pandora-sniplet/app /root/pili/pandora-sniplet/proxy.conf
