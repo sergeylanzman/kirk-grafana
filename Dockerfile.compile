@@ -34,5 +34,5 @@ ENV GOPATH /root/pili/pandora-sniplet
 WORKDIR /root/pili/pandora-sniplet
 RUN go build app
 
-WORKDIR /root/pili/src/github.com/grafana/grafana/
-CMD bin/grafana-server & /root/pili/pandora-sniplet/app /root/pili/pandora-sniplet/proxy.conf
+WORKDIR /root/pili
+CMD ./start

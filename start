@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if ! [ -f "/root/pili/data/grafana.db" ]
+then
+	cp -r /root/pili/init_data/* /root/pili/data/
+    ln -s /root/pili/data/grafana.db /root/pili/src/github.com/grafana/grafana/data/grafana.db
+fi
+
+
+cd /root/pili/src/github.com/grafana/grafana/
+bin/grafana-server & /root/pili/pandora-sniplet/app /root/pili/pandora-sniplet/proxy.conf
