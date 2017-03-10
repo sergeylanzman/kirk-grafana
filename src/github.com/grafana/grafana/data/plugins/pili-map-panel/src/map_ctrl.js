@@ -1,14 +1,11 @@
 import {MetricsPanelCtrl} from 'app/plugins/sdk';
 import echarts from 'app/plugins/pili/echarts';
 import china from './china';
+import './dark_theme';
 import provinces from './province_in_china';
 import _ from 'lodash';
 
 echarts.registerMap('china', china);
-
-function randomData() {
-    return Math.round(Math.random() * 1000);
-}
 
 export class MapCtrl extends MetricsPanelCtrl {
 
@@ -173,7 +170,7 @@ export class MapCtrl extends MetricsPanelCtrl {
     onDataReceived(dataList) {
         let option = {};
         if (!this.didRenderThisComponent) {
-            this._myChart = echarts.init(document.getElementById('echart-dom'));
+            this._myChart = echarts.init(document.getElementById('echart-dom'), 'dark');
             this._yAxis = {
                 type: 'category',
                 nameGap: 16,
