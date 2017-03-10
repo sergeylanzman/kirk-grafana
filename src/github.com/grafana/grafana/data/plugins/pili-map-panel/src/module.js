@@ -1,6 +1,6 @@
-import {MapCtrl} from './map_ctrl';
+import {PluginCtrl} from './plugin_ctrl';
 
 export {
-  MapCtrl as PanelCtrl
+  PluginCtrl as PanelCtrl
 };
 
