@@ -15,22 +15,17 @@ class TopChart {
         this._myChart = echarts.init(document.getElementById(this._elementId), 'dark');
         return {
             title: {
-                text: '全国主要城市 PM 2.5',
-                subtext: 'data from PM25.in',
-                sublink: 'http://www.pm25.in',
+                text: 'Top 10',
                 left: 'center',
-                textStyle: {
-                    color: '#fff'
-                }
             },
             tooltip : {
                 trigger: 'item'
             },
             grid: {
                 right: 40,
-                top: 100,
+                top: 70,
                 bottom: 40,
-                width: '30%'
+                width: '70%'
             },
             xAxis: {
                 type: 'value',
@@ -40,15 +35,10 @@ class TopChart {
                 splitLine: {show: false},
                 axisLine: {show: false},
                 axisTick: {show: false},
-                axisLabel: {margin: 2, textStyle: {color: '#aaa'}},
             },
             yAxis: {
                 type: 'category',
-                name: 'TOP 20',
-                nameGap: 16,
-                axisLine: {show: false, lineStyle: {color: '#ddd'}},
-                axisTick: {show: false, lineStyle: {color: '#ddd'}},
-                axisLabel: {interval: 0, textStyle: {color: '#ddd'}},
+                position: 'left',
                 data: [],
             },
             series : [
@@ -57,11 +47,6 @@ class TopChart {
                     zlevel: 2,
                     type: 'bar',
                     symbol: 'none',
-                    itemStyle: {
-                        normal: {
-                            color: '#ddb926'
-                        }
-                    },
                     data: [],
                 },
             ],
