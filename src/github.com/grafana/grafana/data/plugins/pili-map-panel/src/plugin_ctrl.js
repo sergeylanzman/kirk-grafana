@@ -62,6 +62,7 @@ export class PluginCtrl extends MetricsPanelCtrl {
     onDataReceived(dataList) {
         let mapOption = {},
             topOption = {};
+        dataList = this._parseData(dataList);
 
         if (!this._didRenderThisComponent) {
             mapOption = this._mapChart.setupOption();
@@ -70,6 +71,33 @@ export class PluginCtrl extends MetricsPanelCtrl {
         }
         this._mapChart.updateDataList(mapOption, dataList);
         this._topChart.updateDataList(topOption, dataList);
+    }
+
+    _parseData(dataList) {
+        return dataList.map(({target, datapoints}) => {
+            const targetMatcher = target.match(/\{.+}/);
+            if (!targetMatcher) {
+                return;
+            }
+            let targetObj = targetMatcher[0];
+            if (!targetObj) {
+                return;
+            }
+            targetObj = this._parseTargetObjString(targetObj);
+            const value = datapoints[0][0];
+
+            return {targetObj, value};
+        });
+    }
+
+    _parseTargetObjString(strObj) {
+        const obj = {};
+        const trim = s => s.replace(/(^\s+|\s+$)/, '');
+        strObj.replace(/(\{|\})/g, '').split(',').forEach(cell => {
+            const [key, value] = trim(cell).split(':').map(trim);
+            obj[key] = value;
+        });
+        return obj;
     }
 
     onDataError() {
