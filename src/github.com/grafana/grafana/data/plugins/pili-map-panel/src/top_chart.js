@@ -3,6 +3,7 @@
  */
 
 import echarts from 'app/plugins/pili/echarts';
+import _ from 'lodash';
 
 class TopChart {
 
@@ -82,8 +83,8 @@ class TopChart {
         const yAxisData = option.yAxis.data;
         const seriesData = option.series[0].data;
 
-        dataList.reverse().forEach(({targetObj: {province}, value}) => {
-            yAxisData.push(`${province} :`);
+        dataList.reverse().forEach(({targetObj, value}) => {
+            yAxisData.push(_.values(targetObj).join('/'));
             seriesData.push(value);
         });
 
