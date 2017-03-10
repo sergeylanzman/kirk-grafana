@@ -48,7 +48,7 @@ class TopChart {
                 axisLine: {show: false, lineStyle: {color: '#ddd'}},
                 axisTick: {show: false, lineStyle: {color: '#ddd'}},
                 axisLabel: {interval: 0, textStyle: {color: '#ddd'}},
-                data: ["北京", "上海", "广州", "深圳"]
+                data: [],
             },
             series : [
                 {
@@ -61,7 +61,7 @@ class TopChart {
                             color: '#ddb926'
                         }
                     },
-                    data: [23, 123, 12, 64]
+                    data: [],
                 },
             ],
 
@@ -69,13 +69,24 @@ class TopChart {
     }
 
     updateDataList(option, dataList) {
-        const provinceData = dataList
-            .map(({targetObj, value}) => ({province: targetObj.province, value}))
-            .sort((element1, element2) => element2.value - element1.value);
+        dataList = dataList.sort((element1, element2) => element2.value - element1.value);
 
-        while (provinceData.length > 10) {
-            provinceData.pop();
+        while (dataList.length > 10) {
+            dataList.pop();
         }
+        option.yAxis = option.yAxis || {data: []};
+        option.series = option.series || [{
+            id: 'bar', data: []
+        }];
+
+        const yAxisData = option.yAxis.data;
+        const seriesData = option.series[0].data;
+
+        dataList.reverse().forEach(({targetObj: {province}, value}) => {
+            yAxisData.push(`${province} :`);
+            seriesData.push(value);
+        });
+
         this._myChart.setOption(option);
     }
 }
