@@ -67,10 +67,12 @@ export class MapCtrl extends MetricsPanelCtrl {
     _setupSeries() {
         this._series = [];
         this._seriesMap = {};
-        this._legendData = [];
+        this._legend = {};
+        this._yAxis = {};
     }
 
     _parseData(dataList, option) {
+        let provinceData = [];
         this._series.forEach(serie => this._clearSerieData(serie.data));
         dataList.forEach(({target, datapoints}) => {
             const targetMatcher = target.match(/\{.+}/);
@@ -93,10 +95,23 @@ export class MapCtrl extends MetricsPanelCtrl {
             const targetValues = targetKeys.map(key => targetObj[key]);
             const serieName = targetValues.length >0 ? targetValues.join('-')
                                                      : 'main';
-            this._updateSerieData(targetObj.province, serieName, datapoints);
+
+            const province = targetObj.province;
+            const value = datapoints[0][0];
+
+            this._updateSerieData(province, serieName, value);
+            provinceData.push({province, value});
         });
+        provinceData = provinceData.sort((element1, element2) => element2.value - element1.value);
+        while (provinceData.length > 10) {
+            provinceData.pop();
+        }
+        this._yAxis.data = provinceData.reverse().map(({province, value}) => `${province} : ${value}`);
+        this._legend.show = this._legend.data.length > 1;
+
         option.series = this._series;
-        option.legend = option.legend || {data: this._legendData};
+        option.legend = this._legend;
+        option.yAxis = this._yAxis;
         return option;
     }
 
@@ -124,7 +139,7 @@ export class MapCtrl extends MetricsPanelCtrl {
         });
     }
 
-    _updateSerieData(province, serieName, datapoints) {
+    _updateSerieData(province, serieName, value) {
         let serie = this._seriesMap[serieName];
         if (!serie) {
             serie = {
@@ -132,7 +147,7 @@ export class MapCtrl extends MetricsPanelCtrl {
                 type: 'map',
                 mapType: 'china',
                 roam: false,
-                showLegendSymbol: true,
+                showLegendSymbol: false,
                 data: [],
                 itemStyle: {
                     normal: {
@@ -146,12 +161,12 @@ export class MapCtrl extends MetricsPanelCtrl {
             };
             this._seriesMap[serieName] = serie;
             this._series.push(serie);
-            this._legendData.push(serieName);
+            this._legend.data.push(serieName);
             this._clearSerieData(serie.data);
         }
         const cell = serie.data.find(cell => cell.name === province);
         if (cell) {
-            cell.value = datapoints[0][0];
+            cell.value = value;
         }
     }
 
@@ -159,17 +174,26 @@ export class MapCtrl extends MetricsPanelCtrl {
         let option = {};
         if (!this.didRenderThisComponent) {
             this._myChart = echarts.init(document.getElementById('echart-dom'));
-            // 指定图表的配置项和数据
+            this._yAxis = {
+                type: 'category',
+                nameGap: 16,
+                position: 'right',
+                data: [],
+            };
+            this._legend = {
+                show: true,
+                orient: "vertical",
+                left: "left",
+                data: [],
+            };
             option = {
+                legend: this._legend,
+                yAxis: this._yAxis,
+                series: [],
+
                 tooltip: {
                     trigger: 'item',
                     formatter: '{b}<br/>{c}',
-                },
-                legend: {
-                    show: true,
-                    orient: "vertical",
-                    left: "left",
-                    data: this._legendData,
                 },
                 visualMap: {
                     left: "left",
@@ -193,7 +217,16 @@ export class MapCtrl extends MetricsPanelCtrl {
                     left: "right",
                     top: "center",
                 },
-                series: [],
+                xAxis: {
+                    type: 'value',
+                    scale: true,
+                    position: 'right',
+                    boundaryGap: false,
+                    splitLine: {show: false},
+                    axisLine: {show: false},
+                    axisTick: {show: false},
+                    axisLabel: {margin: 2, textStyle: {color: '#aaa'}},
+                },
             };
             this.didRenderThisComponent = true;
         }
