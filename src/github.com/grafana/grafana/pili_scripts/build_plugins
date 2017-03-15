@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+BASEDIR=$(dirname "$0")
+cd $BASEDIR/../data/plugins
+
+WORK_PATH=$PWD
+for dir in */ ; do
+    cd $WORK_PATH/$dir
+	echo "start build $dir"
+    npm install || exit 1
+    grunt || exit 1
+done
