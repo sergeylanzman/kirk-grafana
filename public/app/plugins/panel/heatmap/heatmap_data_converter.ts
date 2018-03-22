@@ -1,7 +1,4 @@
-///<reference path="../../../headers/common.d.ts" />
-
 import _ from 'lodash';
-import TimeSeries from 'app/core/time_series2';
 
 let VALUE_INDEX = 0;
 let TIME_INDEX = 1;
@@ -16,13 +13,18 @@ interface YBucket {
   values: number[];
 }
 
-function elasticHistogramToHeatmap(seriesList) {
+/**
+ * Convert histogram represented by the list of series to heatmap object.
+ * @param seriesList List of time series
+ */
+function histogramToHeatmap(seriesList) {
   let heatmap = {};
 
-  for (let series of seriesList) {
-    let bound = Number(series.alias);
+  for (let i = 0; i < seriesList.length; i++) {
+    let series = seriesList[i];
+    let bound = i;
     if (isNaN(bound)) {
-      return;
+      return heatmap;
     }
 
     for (let point of series.datapoints) {
@@ -35,14 +37,60 @@ function elasticHistogramToHeatmap(seriesList) {
 
       let bucket = heatmap[time];
       if (!bucket) {
-        bucket = heatmap[time] = {x: time, buckets: {}};
+        bucket = heatmap[time] = { x: time, buckets: {} };
       }
 
-      bucket.buckets[bound] = {y: bound, count: count, values: [], points: []};
+      bucket.buckets[bound] = {
+        y: bound,
+        count: count,
+        bounds: {
+          top: null,
+          bottom: bound,
+        },
+        values: [],
+        points: [],
+      };
     }
   }
 
   return heatmap;
+}
+
+/**
+ * Sort series representing histogram by label value.
+ */
+function sortSeriesByLabel(s1, s2) {
+  let label1, label2;
+
+  try {
+    // fail if not integer. might happen with bad queries
+    label1 = parseHistogramLabel(s1.label);
+    label2 = parseHistogramLabel(s2.label);
+  } catch (err) {
+    console.log(err.message || err);
+    return 0;
+  }
+
+  if (label1 > label2) {
+    return 1;
+  }
+
+  if (label1 < label2) {
+    return -1;
+  }
+
+  return 0;
+}
+
+function parseHistogramLabel(label: string): number {
+  if (label === '+Inf' || label === 'inf') {
+    return +Infinity;
+  }
+  const value = Number(label);
+  if (isNaN(value)) {
+    throw new Error(`Error parsing histogram label: ${label} is not a number`);
+  }
+  return value;
 }
 
 /**
@@ -51,9 +99,11 @@ function elasticHistogramToHeatmap(seriesList) {
  * @return {Array}          Array of "card" objects
  */
 function convertToCards(buckets) {
+  let min = 0,
+    max = 0;
   let cards = [];
   _.forEach(buckets, xBucket => {
-    _.forEach(xBucket.buckets, yBucket=> {
+    _.forEach(xBucket.buckets, yBucket => {
       let card = {
         x: xBucket.x,
         y: yBucket.y,
@@ -62,10 +112,19 @@ function convertToCards(buckets) {
         count: yBucket.count,
       };
       cards.push(card);
+
+      if (cards.length === 1) {
+        min = yBucket.count;
+        max = yBucket.count;
+      }
+
+      min = yBucket.count < min ? yBucket.count : min;
+      max = yBucket.count > max ? yBucket.count : max;
     });
   });
 
-  return cards;
+  let cardStats = { min, max };
+  return { cards, cardStats };
 }
 
 /**
@@ -90,7 +149,7 @@ function mergeZeroBuckets(buckets, minValue) {
     let yBuckets = xBucket.buckets;
 
     let emptyBucket = {
-      bounds: {bottom: 0, top: 0},
+      bounds: { bottom: 0, top: 0 },
       values: [],
       points: [],
       count: 0,
@@ -101,7 +160,7 @@ function mergeZeroBuckets(buckets, minValue) {
 
     let newBucket = {
       y: 0,
-      bounds: {bottom: minValue, top: minBucket.bounds.top || minValue},
+      bounds: { bottom: minValue, top: minBucket.bounds.top || minValue },
       values: [],
       points: [],
       count: 0,
@@ -123,8 +182,8 @@ function mergeZeroBuckets(buckets, minValue) {
 }
 
 /**
-   * Convert set of time series into heatmap buckets
-   * @return {Object}    Heatmap object:
+ * Convert set of time series into heatmap buckets
+ * @return {Object}    Heatmap object:
  * {
  *   xBucketBound_1: {
  *     x: xBucketBound_1,
@@ -189,7 +248,9 @@ function convertToHeatMap(seriesList, yBucketSize, xBucketSize, logBase = 1) {
 
 function pushToXBuckets(buckets, point, bucketNum, seriesName) {
   let value = point[VALUE_INDEX];
-  if (value === null || value === undefined || isNaN(value)) { return; }
+  if (value === null || value === undefined || isNaN(value)) {
+    return;
+  }
 
   // Add series name to point for future identification
   let point_ext = _.concat(point, seriesName);
@@ -201,7 +262,7 @@ function pushToXBuckets(buckets, point, bucketNum, seriesName) {
     buckets[bucketNum] = {
       x: bucketNum,
       values: [value],
-      points: [point_ext]
+      points: [point_ext],
     };
   }
 }
@@ -214,12 +275,14 @@ function pushToYBuckets(buckets, bucketNum, value, point, bounds) {
   }
   if (buckets[bucketNum]) {
     buckets[bucketNum].values.push(value);
+    buckets[bucketNum].points.push(point);
     buckets[bucketNum].count += count;
   } else {
     buckets[bucketNum] = {
       y: bucketNum,
       bounds: bounds,
       values: [value],
+      points: [point],
       count: count,
     };
   }
@@ -241,7 +304,7 @@ function getBucketBounds(value, bucketSize) {
   bottom = Math.floor(value / bucketSize) * bucketSize;
   top = (Math.floor(value / bucketSize) + 1) * bucketSize;
 
-  return {bottom, top};
+  return { bottom, top };
 }
 
 function getBucketBound(value, bucketSize) {
@@ -269,7 +332,7 @@ function convertToValueBuckets(xBucket, bucketSize) {
 function getLogScaleBucketBounds(value, yBucketSplitFactor, logBase) {
   let top, bottom;
   if (value === 0) {
-    return {bottom: 0, top: 0};
+    return { bottom: 0, top: 0 };
   }
 
   let value_log = logp(value, logBase);
@@ -287,7 +350,7 @@ function getLogScaleBucketBounds(value, yBucketSplitFactor, logBase) {
   bottom = Math.pow(logBase, pow);
   top = Math.pow(logBase, powTop);
 
-  return {bottom, top};
+  return { bottom, top };
 }
 
 function getLogScaleBucketBound(value, yBucketSplitFactor, logBase) {
@@ -307,12 +370,6 @@ function convertToLogScaleValueBuckets(xBucket, yBucketSplitFactor, logBase) {
   });
 
   return buckets;
-}
-
-// Get minimum non zero value.
-function getMinLog(series) {
-  let values = _.compact(_.map(series.datapoints, p => p[0]));
-  return _.min(values);
 }
 
 /**
@@ -373,36 +430,40 @@ function isHeatmapDataEqual(objA: any, objB: any): boolean {
   let is_eql = !emptyXOR(objA, objB);
 
   _.forEach(objA, (xBucket: XBucket, x) => {
-      if (objB[x]) {
+    if (objB[x]) {
       if (emptyXOR(xBucket.buckets, objB[x].buckets)) {
-      is_eql = false;
-      return false;
-      }
-
-      _.forEach(xBucket.buckets, (yBucket: YBucket, y) => {
-          if (objB[x].buckets && objB[x].buckets[y]) {
-          if (objB[x].buckets[y].values) {
-          is_eql = _.isEqual(_.sortBy(yBucket.values), _.sortBy(objB[x].buckets[y].values));
-          if (!is_eql) {
-          return false;
-          }
-          } else {
-          is_eql = false;
-          return false;
-          }
-          } else {
-          is_eql = false;
-          return false;
-          }
-          });
-
-      if (!is_eql) {
-        return false;
-      }
-      } else {
         is_eql = false;
         return false;
       }
+
+      _.forEach(xBucket.buckets, (yBucket: YBucket, y) => {
+        if (objB[x].buckets && objB[x].buckets[y]) {
+          if (objB[x].buckets[y].values) {
+            is_eql = _.isEqual(_.sortBy(yBucket.values), _.sortBy(objB[x].buckets[y].values));
+            if (!is_eql) {
+              return false;
+            } else {
+              return true;
+            }
+          } else {
+            is_eql = false;
+            return false;
+          }
+        } else {
+          is_eql = false;
+          return false;
+        }
+      });
+
+      if (!is_eql) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      is_eql = false;
+      return false;
+    }
   });
 
   return is_eql;
@@ -414,11 +475,11 @@ function emptyXOR(foo: any, bar: any): boolean {
 
 export {
   convertToHeatMap,
-    elasticHistogramToHeatmap,
-    convertToCards,
-    mergeZeroBuckets,
-    getMinLog,
-    getValueBucketBound,
-    isHeatmapDataEqual,
-    calculateBucketSize
+  histogramToHeatmap,
+  convertToCards,
+  mergeZeroBuckets,
+  getValueBucketBound,
+  isHeatmapDataEqual,
+  calculateBucketSize,
+  sortSeriesByLabel,
 };

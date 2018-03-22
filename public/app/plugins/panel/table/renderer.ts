@@ -1,5 +1,3 @@
-///<reference path="../../../headers/common.d.ts" />
-
 import _ from 'lodash';
 import moment from 'moment';
 import kbn from 'app/core/utils/kbn';
@@ -46,7 +44,9 @@ export class TableRenderer {
   }
 
   getColorForValue(value, style) {
-    if (!style.thresholds) { return null; }
+    if (!style.thresholds) {
+      return null;
+    }
 
     for (var i = style.thresholds.length; i > 0; i--) {
       if (value >= style.thresholds[i - 1]) {
@@ -89,7 +89,9 @@ export class TableRenderer {
           return '-';
         }
 
-        if (_.isArray(v)) { v = v[0]; }
+        if (_.isArray(v)) {
+          v = v[0];
+        }
         var date = moment(v);
         if (this.isUtc) {
           date = date.utc();
@@ -101,12 +103,12 @@ export class TableRenderer {
     if (column.style.type === 'number') {
       let valueFormatter = kbn.valueFormats[column.unit || column.style.unit];
 
-      return v =>  {
+      return v => {
         if (v === null || v === void 0) {
           return '-';
         }
 
-        if (_.isString(v)) {
+        if (_.isString(v) || _.isArray(v)) {
           return this.defaultCellFormatter(v, column.style);
         }
 
@@ -118,7 +120,7 @@ export class TableRenderer {
       };
     }
 
-    return (value) => {
+    return value => {
       return this.defaultCellFormatter(value, column.style);
     };
   }
@@ -140,9 +142,12 @@ export class TableRenderer {
 
   renderCell(columnIndex, rowIndex, value, addWidthHack = false) {
     value = this.formatColumnValue(columnIndex, value);
+
+    var column = this.table.columns[columnIndex];
     var style = '';
     var cellClasses = [];
     var cellClass = '';
+
     if (this.colorState.cell) {
       style = ' style="background-color:' + this.colorState.cell + ';color: white"';
       this.colorState.cell = null;
@@ -154,40 +159,52 @@ export class TableRenderer {
     // because of the fixed table headers css only solution
     // there is an issue if header cell is wider the cell
     // this hack adds header content to cell (not visible)
-    var widthHack = '';
+    var columnHtml = '';
     if (addWidthHack) {
-      widthHack = '<div class="table-panel-width-hack">' + this.table.columns[columnIndex].title + '</div>';
+      columnHtml = '<div class="table-panel-width-hack">' + this.table.columns[columnIndex].title + '</div>';
     }
 
     if (value === undefined) {
       style = ' style="display:none;"';
-      this.table.columns[columnIndex].hidden = true;
+      column.hidden = true;
     } else {
-      this.table.columns[columnIndex].hidden = false;
+      column.hidden = false;
     }
 
-    var columnStyle = this.table.columns[columnIndex].style;
-    if (columnStyle && columnStyle.preserveFormat) {
-      cellClasses.push("table-panel-cell-pre");
+    if (column.style && column.style.preserveFormat) {
+      cellClasses.push('table-panel-cell-pre');
     }
 
-    var columnHtml = value + widthHack;
-
-    if (columnStyle && columnStyle.link) {
+    if (column.style && column.style.link) {
       // Render cell as link
       var scopedVars = this.renderRowVariables(rowIndex);
       scopedVars['__cell'] = { value: value };
 
-      var cellLink = this.templateSrv.replace(columnStyle.linkUrl, scopedVars);
-      var cellLinkTooltip = this.templateSrv.replace(columnStyle.linkTooltip, scopedVars);
-      var cellTarget = columnStyle.linkTargetBlank ? '_blank' : '';
+      var cellLink = this.templateSrv.replace(column.style.linkUrl, scopedVars);
+      var cellLinkTooltip = this.templateSrv.replace(column.style.linkTooltip, scopedVars);
+      var cellTarget = column.style.linkTargetBlank ? '_blank' : '';
 
-      cellClasses.push("table-panel-cell-link");
-      columnHtml = `
+      cellClasses.push('table-panel-cell-link');
+      columnHtml += `
         <a href="${cellLink}" target="${cellTarget}" data-link-tooltip data-original-title="${cellLinkTooltip}" data-placement="right">
-          ${columnHtml}
+          ${value}
         </a>
       `;
+    } else {
+      columnHtml += value;
+    }
+
+    if (column.filterable) {
+      cellClasses.push('table-panel-cell-filterable');
+      columnHtml += `
+        <a class="table-panel-filter-link" data-link-tooltip data-original-title="Filter out value" data-placement="bottom"
+           data-row="${rowIndex}" data-column="${columnIndex}" data-operator="!=">
+          <i class="fa fa-search-minus"></i>
+        </a>
+        <a class="table-panel-filter-link" data-link-tooltip data-original-title="Filter for value" data-placement="bottom"
+           data-row="${rowIndex}" data-column="${columnIndex}" data-operator="=">
+          <i class="fa fa-search-plus"></i>
+        </a>`;
     }
 
     if (cellClasses.length) {
@@ -202,7 +219,7 @@ export class TableRenderer {
     let pageSize = this.panel.pageSize || 100;
     let startPos = page * pageSize;
     let endPos = Math.min(startPos + pageSize, this.table.rows.length);
-    var html = "";
+    var html = '';
 
     for (var y = startPos; y < endPos; y++) {
       let row = this.table.rows[y];
@@ -235,8 +252,8 @@ export class TableRenderer {
       rows.push(new_row);
     }
     return {
-        columns: this.table.columns,
-        rows: rows,
+      columns: this.table.columns,
+      rows: rows,
     };
   }
 }
